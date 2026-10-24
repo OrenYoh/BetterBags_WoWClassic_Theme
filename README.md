@@ -1,11 +1,4 @@
-# BetterBags - WoW Classic Theme • a BetterBags plugin
-
-Gives BetterBags the look of World of Warcraft's classic bags: the stone frame with the backpack portrait in its gold ring, the dark title bar, the classic close button and the money bar along the bottom.
-
-It is drawn with the game's own art (`Interface\ContainerFrame\UI-BackpackBackground`), which every client still ships. The classic art is a fixed-size bag with its slots painted in, so the theme cuts it into pieces (header, borders, money bar) that stretch around a bag of any size. The stone behind the items is a seamless tile made from that art's own stone (`images/stone.png`).
-
-Pick **WoW Classic** in BetterBags' **Settings > Appearance**. Only the bag windows change; settings, dialogs and the bag slots keep BetterBags' default look.
-
-### Requirements
-
-- [BetterBags](https://www.curseforge.com/wow/addons/better-bags)
+<h1 align="center">BetterBags - WoW Classic Theme &bull; a BetterBags plugin</h1>
+<p align="center"><img src="https://media.forgecdn.net/attachments/description/1762354/description_6b08e20c-0616-4b9d-a86f-8afbd8c45620.png" alt="BetterBags - DialogueUI Theme icon" width="300" height="300"></p>
+<p align="center"><a href="https://www.curseforge.com/wow/addons/betterbags-wowclassic-theme" target="_blank" rel="nofollow noopener"><img src="https://img.shields.io/badge/CurseForge-BetterBags_WoWClassic_Theme-EB622B.svg?style=flat" alt="CurseForge BetterBags_WoWClassic_Theme"></a> <a href="https://addons.wago.io/addons/addons/betterbags-wowclassic-theme" target="_blank" rel="nofollow noopener"><img src="https://img.shields.io/badge/Wago-BetterBags_WoWClassic_Theme-B71D23.svg?style=flat" alt="Wago BetterBags_WoWClassic_Theme"></a></p>
+<p>Lightweight addon to add a WoW Classic theme into BetterBags.<br>Requires BetterBags installed.</p>
