@@ -1,4 +1,4 @@
 <h1 align="center">BetterBags - WoW Classic Theme &bull; a BetterBags plugin</h1>
 <p align="center"><img src="https://media.forgecdn.net/attachments/description/1762354/description_6b08e20c-0616-4b9d-a86f-8afbd8c45620.png" alt="BetterBags - DialogueUI Theme icon" width="300" height="300"></p>
 <p align="center"><a href="https://www.curseforge.com/wow/addons/betterbags-wowclassic-theme" target="_blank" rel="nofollow noopener"><img src="https://img.shields.io/badge/CurseForge-BetterBags_WoWClassic_Theme-EB622B.svg?style=flat" alt="CurseForge BetterBags_WoWClassic_Theme"></a> <a href="https://addons.wago.io/addons/addons/betterbags-wowclassic-theme" target="_blank" rel="nofollow noopener"><img src="https://img.shields.io/badge/Wago-BetterBags_WoWClassic_Theme-B71D23.svg?style=flat" alt="Wago BetterBags_WoWClassic_Theme"></a></p>
-<p>Lightweight addon to add a WoW Classic theme into BetterBags.<br>Requires BetterBags installed.</p>
+<p>Lightweight addon to add a WoW Classic theme into BetterBags.<br>Works with both the classic bags and BetterBags Next.<br>Requires BetterBags installed.</p>

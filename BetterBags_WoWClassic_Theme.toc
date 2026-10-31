@@ -3,10 +3,12 @@
 ## Category: Inventory
 ## Notes: Adds the classic World of Warcraft bag look as a BetterBags theme.
 ## Author: OrenYoh
-## Version: 1.0.1
+## Version: 2.0.0
 ## IconTexture: Interface\AddOns\BetterBags_WoWClassic_Theme\images\icon.png
 ## Dependencies: BetterBags
+## SavedVariables: BetterBags_WoWClassic_ThemeDB
 ## X-Curse-Project-ID: 1762354
 ## X-Wago-ID: vNAWppKo
 
 theme.lua
+next.lua

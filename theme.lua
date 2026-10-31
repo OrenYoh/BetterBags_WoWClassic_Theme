@@ -34,6 +34,9 @@ local ONE = { Left = 1, Right = 1, Top = 1, Bottom = 1 }
 -- that tall (GROWTH in source/footer_tile.py, which must match). The borders and the stone fill
 -- the space between.
 local HEADER_BOTTOM = -(46 - TOP)
+-- The header's stone fades out over its last 14 rows (source/seams.py), so the fill starts under them and the two
+-- grains blend rather than meet in a line (seen in game).
+local FILL_UNDER_HEADER = 14
 local FOOTER_GROWTH = 10
 local FOOTER_TOP = BOTTOM - 227 + FOOTER_GROWTH
 -- Inside the bar's gold lines: from art y 231 down to 243, plus the growth; raised 2 to look
@@ -68,7 +71,7 @@ local TEXTURES = {
     VertTile = true,
     Layer = "BACKGROUND",
     Points = {
-      { Point = "TOPLEFT", X = 80 - LEFT, Y = HEADER_BOTTOM },
+      { Point = "TOPLEFT", X = 80 - LEFT, Y = HEADER_BOTTOM + FILL_UNDER_HEADER },
       { Point = "BOTTOMRIGHT", X = 244 - RIGHT, Y = FOOTER_TOP },
     },
   },
@@ -117,6 +120,12 @@ local TEXTURES = {
   },
 }
 
+-- The buttons at the end of the search bar: 28 square, SORT_GAP apart, the first 9 in from the window's right edge
+-- (inside its 7-wide border).
+local SORT_SIZE, SORT_RIGHT, SORT_GAP = 28, -9, 2
+local HIGHLIGHT = { Texture = "Interface\\Buttons\\ButtonHilight-Square", BlendMode = "ADD",
+  Inset = { Left = 2, Right = 2, Top = 2, Bottom = 3 } }
+
 -- The bag's name, centered in the title bar (art x 110 to 226), at the height the classic bag's
 -- name sat (art y 10).
 local TITLE = {
@@ -160,9 +169,36 @@ sonata:RegisterTheme({
           Points = {
             -- Lined up with the items, as they sit in a bag snapped to its content (seen in game).
             { Point = "TOPLEFT", X = 32, Y = HEADER_BOTTOM },
-            { Point = "BOTTOMRIGHT", RelativePoint = "TOPRIGHT", X = -27, Y = HEADER_BOTTOM - 20 },
+            -- Ending 4 before the sort button.
+            { Point = "BOTTOMRIGHT", RelativePoint = "TOPRIGHT", X = SORT_RIGHT - 2 * SORT_SIZE - SORT_GAP - 4,
+              Y = HEADER_BOTTOM - 20 },
           },
           Reserve = 24,
+        },
+        -- At the end of the search bar, 28 square, their middles on the search bar's, right to left (Row, below):
+        -- Show Bags (the menu's), drawn as the game's backpack button on its bag bar (bag-main, its bag-main-highlight
+        -- added under the pointer; every client has them), darker while pressed; then the game's own Clean Up Bags
+        -- button (ContainerFrame.xml, BagItemAutoSortButton: bags-button-autosort-up and -down, ButtonHilight-Square
+        -- added under the pointer at 24 x 23), which sorts as the menu button's right click does.
+        Actions = {
+          Points = { { Point = "TOPRIGHT", X = SORT_RIGHT, Y = HEADER_BOTTOM - 10 + SORT_SIZE / 2 } },
+          Size = SORT_SIZE,
+          Spacing = SORT_GAP,
+          Row = true,
+          Buttons = {
+            {
+              Action = "ShowBags",
+              Normal = { Atlas = "bag-main" },
+              Pushed = { Atlas = "bag-main", VertexColor = { 0.6, 0.6, 0.6, 1 } },
+              Highlight = { Atlas = "bag-main-highlight", BlendMode = "ADD" },
+            },
+            {
+              Action = "Sort",
+              Normal = { Atlas = "bags-button-autosort-up" },
+              Pushed = { Atlas = "bags-button-autosort-down" },
+              Highlight = HIGHLIGHT,
+            },
+          },
         },
         -- The money and currencies sit inside the money bar.
         Footer = { Left = 12, Right = 12, Bottom = MONEY_BOTTOM, Height = MONEY_HEIGHT, Reserve = FOOTER_TOP },
@@ -220,11 +256,12 @@ local function portraitOf(button)
   return button.wowClassicPortrait
 end
 
--- Only the classic bags have a menu button; BetterBags Next draws its own panels.
+-- Only the classic bags' menu button is a frame: BetterBags Next's bag button (next.lua) is an object of its own, its
+-- portrait the art's.
 local function updatePortrait()
   local bag = BetterBags.Bags and BetterBags.Bags.Backpack
   local button = bag and bag.menuButton
-  if button == nil then return end
+  if button == nil or button.CreateTexture == nil then return end
   local texture = sonata:GetCurrentThemeKey() == "WoWClassic" and firstBagIcon() or nil
   if texture == nil then
     if button.wowClassicPortrait ~= nil then button.wowClassicPortrait:Hide() end
@@ -239,3 +276,21 @@ events:RegisterMessage('sonata/ThemeChanged', updatePortrait)
 events:RegisterMessage('bags/DesignChanged', updatePortrait)
 events:RegisterEvent('BAG_CONTAINER_UPDATE', updatePortrait)
 events:RegisterEvent('PLAYER_ENTERING_WORLD', updatePortrait)
+
+-- BetterBags stacks a theme's action buttons down from the first (frames/bagactions.lua, BagActions:Place); this theme's
+-- (Layout.Actions with Row, its own key) go right to left from it instead, each SORT_GAP left of the one before.
+-- KEEP WATCH on BetterBags releases: this hooks BetterBags' internals (the BagActions module's Place and the buttons it
+-- keeps). If they are renamed the buttons stack down again; if BetterBags lets a theme lay its actions in a row, use that.
+local bagActions = BetterBags:GetModule('BagActions', true)
+if bagActions ~= nil and bagActions.Place ~= nil then
+  hooksecurefunc(bagActions, "Place", function(_, actions, layout)
+    if type(layout) ~= "table" or not layout.Row or actions == nil or actions.buttons == nil then return end
+    for i = 2, #(layout.Buttons or {}) do
+      local button, before = actions.buttons[i], actions.buttons[i - 1]
+      if button ~= nil and before ~= nil then
+        button:ClearAllPoints()
+        button:SetPoint("RIGHT", before, "LEFT", -(layout.Spacing or 0), 0)
+      end
+    end
+  end)
+end
