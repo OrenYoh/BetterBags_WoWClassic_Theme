@@ -62,30 +62,90 @@ local CLOSE = {
   Highlight = { Texture = "Interface\\Buttons\\UI-Panel-MinimizeButton-Highlight", Atlas = false, BlendMode = "ADD" },
 }
 
--- Two buttons out of the bag button's menu at the end of the search bar, as the classic theme's (theme.lua), each its art
--- at 28 across centered on a 24-square header button, their middles on the search bar's (SearchTop + SearchHeight / 2):
---   Show Blizzard Bags (the backpack's bagsButton), pinned 8 in from the outer side: the game's backpack button on its
---   bag bar (bag-main, bag-main-highlight added under the pointer; every client has them).
---   Left of it, its art PINS_GAP from the first's, the sort button: the game's own Clean Up Bags button
---   (ContainerFrame.xml, BagItemAutoSortButton: bags-button-autosort-up and -down, 28 x 26, ButtonHilight-Square added
---   under the pointer).
--- The search bar ends 4 before them. Pinned buttons leave the menu; a pin along the top also keeps the title clear of
+-- Buttons out of the bag button's menu at the end of the search bar, as the classic theme's (theme.lua), each its art
+-- at 28 across centered on a 24-square header button, their middles on the search bar's (SearchTop + SearchHeight / 2),
+-- in SEARCH_ROW's order from the outer side: the first 8 in from it, each next one's art PINS_GAP from the one before.
+--   Open Options Screen (settingsButton), on every panel: a gear (images/next/settings.png).
+--   Show Blizzard Bags (the backpack's bagsButton): a satchel (images/next/satchel.png).
+--   The sort button (the backpack's and the bank's): a broom (images/next/broom.png).
+--   The vendor's Sell Junk and Repair All: a coin pouch (images/next/sell_junk.png) and an anvil (images/next/repair.png).
+--   Its Repair With Guild Funds: the game's own merchant button (MerchantFrame.xml, MerchantGuildBankRepairButton),
+--   ButtonHilight-Square added under the pointer, as the game's.
+--   The vendor's are grayed while they have nothing to do, as the game's are (BetterBags desaturates them).
+-- The search bar ends 4 before the last. Pinned buttons leave the menu; a pin along the top also keeps the title clear of
 -- it, so the name would sit left of the middle: the title's room leaves them out (at the end).
 local PINS_GAP = 2
 local FIRST_X, PINS_Y = -8, -(HEADER_BOTTOM + 2 + 10 - 12)
-local SECOND_X = FIRST_X - 24 - 2 - PINS_GAP - 2
-local BAGS = {
-  Atlas = "bag-main", Glyph = false, Scale = 28 / 24,
-  Highlight = { Atlas = "bag-main-highlight", BlendMode = "ADD" },
-}
-local SORT = {
-  Atlas = "bags-button-autosort-up", Glyph = false, Scale = 28 / 24,
-  Pushed = { Atlas = "bags-button-autosort-down" },
-  Highlight = { Texture = "Interface\\Buttons\\ButtonHilight-Square", BlendMode = "ADD" },
-}
-local SEARCH_RIGHT = -SECOND_X + 24 + 2 + 4
+local PIN_STEP = 24 + 2 + PINS_GAP + 2
+local SEARCH_ROW = { "settingsButton", "bagsButton", "sortButton", "sellJunkButton", "repairAllButton",
+  "guildRepairButton" }
 -- The buttons pinned on the search bar's row, below the title (see the title's room, at the end).
-local SEARCH_ROW_PINS = { sortButton = true, bagsButton = true }
+local SEARCH_ROW_PINS = {}
+for _, key in ipairs(SEARCH_ROW) do
+  SEARCH_ROW_PINS[key] = true
+end
+
+---@param n number
+---@return number
+local function pinX(n)
+  return FIRST_X - (n - 1) * PIN_STEP
+end
+
+-- searchRight is the search bar's inset from the outer side, for n buttons after it.
+---@param n number
+---@return number
+local function searchRight(n)
+  return -pinX(n) + 24 + 2 + 4
+end
+
+local HIGHLIGHT = { Texture = "Interface\\Buttons\\ButtonHilight-Square", BlendMode = "ADD" }
+-- The theme's own round gold-rimmed icons (images/next, 64 square): a soft round light over them under the
+-- pointer (icon_highlight.png), the square one would show its corners past the rim. Atlas and Pushed false drop Plain's.
+local ROUND_HIGHLIGHT = { Texture = NEXT .. "icon_highlight.png", Atlas = false, BlendMode = "ADD" }
+---@param file string
+---@return table
+local function roundIcon(file)
+  return { Texture = NEXT .. file, Atlas = false, Pushed = false, Glyph = false, Scale = 28 / 24,
+    Highlight = ROUND_HIGHLIGHT }
+end
+local SETTINGS = roundIcon("settings.png")
+local BAGS = roundIcon("satchel.png")
+local SORT = roundIcon("broom.png")
+local SELL_JUNK = roundIcon("sell_junk.png")
+local REPAIR_ALL = roundIcon("repair.png")
+
+-- Repair With Guild Funds: retail's atlas where the client has it; else the classic merchant's (MerchantFrame.xml of the
+-- classic clients: UI-Merchant-RepairIcons, the guild's its last third).
+---@param atlas string
+---@return boolean
+local function hasAtlas(atlas)
+  return C_Texture ~= nil and C_Texture.GetAtlasInfo ~= nil and C_Texture.GetAtlasInfo(atlas) ~= nil
+end
+
+local REPAIR_ICONS = "Interface\\MerchantFrame\\UI-Merchant-RepairIcons"
+---@param atlas string
+---@param texture string
+---@param texCoords? number[]
+---@return table
+local function merchantIcon(atlas, texture, texCoords)
+  if hasAtlas(atlas) then
+    return { Atlas = atlas, Glyph = false, Scale = 28 / 24, Highlight = HIGHLIGHT }
+  end
+  return { Texture = texture, TexCoords = texCoords, Glyph = false, Scale = 28 / 24, Highlight = HIGHLIGHT }
+end
+local GUILD_REPAIR = merchantIcon("SpellIcon-256x256-RepairAllGuild", REPAIR_ICONS, { 0.5625, 0.84375, 0, 0.5625 })
+
+-- Each pinned where it is on the backpack and the vendor with every button shown; the pack (at the end) moves them
+-- together on each panel, for the ones it shows.
+local SEARCH_RIGHT = searchRight(3)
+local PINS = {}
+for n, key in ipairs({ "settingsButton", "bagsButton", "sortButton" }) do
+  PINS[key] = { Point = "TOPOUTER", X = pinX(n), Y = PINS_Y }
+end
+for n, key in ipairs({ "sellJunkButton", "repairAllButton", "guildRepairButton" }) do
+  PINS[key] = { Point = "TOPOUTER", X = pinX(n + 1), Y = PINS_Y }
+end
+PINS.closeButton = { Point = "TOPOUTER", X = 2, Y = 1 }
 
 -- The bag button (the header's actions in its menu, as Plain keeps them) over the portrait, as the classic theme's menu
 -- button covers it (theme.lua: 40 square, 6 out and 2 above the corner): the art's backpack shows through it, the
@@ -175,12 +235,11 @@ sonataNext:RegisterTheme({
 
   Header = {
     Buttons = {
-      Pinned = {
-        closeButton = { Point = "TOPOUTER", X = 2, Y = 1 },
-        bagsButton = { Point = "TOPOUTER", X = FIRST_X, Y = PINS_Y },
-        sortButton = { Point = "TOPOUTER", X = SECOND_X, Y = PINS_Y },
+      Pinned = PINS,
+      Icons = {
+        closeButton = CLOSE, settingsButton = SETTINGS, sortButton = SORT, bagsButton = BAGS,
+        sellJunkButton = SELL_JUNK, repairAllButton = REPAIR_ALL, guildRepairButton = GUILD_REPAIR,
       },
-      Icons = { closeButton = CLOSE, sortButton = SORT, bagsButton = BAGS },
       Menu = BAG_BUTTON,
     },
   },
@@ -335,4 +394,55 @@ if nextPanel ~= nil and nextStyle ~= nil and nextPanel.proto ~= nil and nextPane
     end
     return room
   end
+end
+
+-- The buttons on the search bar's row are pinned (above) where the backpack and the vendor show them all, but each panel
+-- shows its own few (the bank: Open Options Screen and the sort; the guild bank: Open Options Screen; the vendor: Repair All
+-- and Repair With Guild Funds only where it repairs, and the guild's only with its funds). While this theme is in use,
+-- every time BetterBags lays the header out or places the search bar, the ones a panel shows are moved together from its
+-- outer side in SEARCH_ROW's order, and its search bar ends 4 before the last, as wide as they leave it.
+-- KEEP WATCH on BetterBags releases: this hooks BetterBags Next's internals (NextPanel's proto.LayoutHeader and
+-- proto.styleSearch, the panel's headerButtons and their key, its side, body and searchBox.frame, and placeSearch). If they
+-- are renamed, the buttons keep their pins above (with gaps on the bank and the vendor) and the search bar its Inset; if
+-- BetterBags lets a theme pin buttons per panel, or packs a row of pins itself, remove this and use that instead.
+local function packSearchRow(panel)
+  if not active() or panel.headerButtons == nil or panel.body == nil then return end
+  local left = panel.side == "LEFT"
+  local corner = left and "TOPLEFT" or "TOPRIGHT"
+  local byKey = {}
+  for _, button in ipairs(panel.headerButtons) do
+    if button.key ~= nil then
+      byKey[button.key] = button
+    end
+  end
+  local shown = 0
+  for _, key in ipairs(SEARCH_ROW) do
+    local button = byKey[key]
+    if button ~= nil and button:IsShown() then
+      shown = shown + 1
+      local x = pinX(shown)
+      button:ClearAllPoints()
+      pixel:Point(button, corner, panel.body, corner, left and -x or x, PINS_Y)
+    end
+  end
+  local frame = panel.searchBox and panel.searchBox.frame
+  if frame == nil then return end
+  for i = 1, frame:GetNumPoints() do
+    local point, relativeTo, relativePoint, _, y = frame:GetPoint(i)
+    if point == corner then
+      local right = shown > 0 and searchRight(shown) or -FIRST_X
+      -- Its height kept as BetterBags placed it: only its outer end moves.
+      frame:SetPoint(point, relativeTo, relativePoint, pixel:Snap(frame, left and right or -right), y)
+      if panel.placeSearch ~= nil then
+        panel:placeSearch()
+      end
+      return
+    end
+  end
+end
+
+if nextPanel ~= nil and pixel ~= nil and nextPanel.proto ~= nil and nextPanel.proto.LayoutHeader ~= nil
+  and nextPanel.proto.styleSearch ~= nil then
+  hooksecurefunc(nextPanel.proto, "LayoutHeader", packSearchRow)
+  hooksecurefunc(nextPanel.proto, "styleSearch", packSearchRow)
 end
