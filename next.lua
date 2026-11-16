@@ -17,23 +17,27 @@ local IMAGES = "Interface\\AddOns\\BetterBags_WoWClassic_Theme\\images\\"
 local NEXT = IMAGES .. "next\\"
 
 -- The header is 44 tall from 4 above the body's top (its gold ring reaches above the window) to 40 below it; the money bar
--- is 33 tall along the bottom (the art's 23 and the 10 theme.lua adds, so the money fits in it); the borders are 3 wide on
--- each side, as the header and the money bar end.
+-- is 33 tall along the bottom (the art's 23 and the 10 theme.lua adds, so the money fits in it). The inner border is 6
+-- wide, its inner shadow with it as theme.lua draws it (the ring's notch above sits over all 6: 3 showed it out of line,
+-- seen in game), and starts with the 6 rows where it bends out of the notch (EDGE_TOP); the outer one is 3 wide.
 local HEADER, HEADER_ABOVE = 44, 4
 local HEADER_BOTTOM = HEADER - HEADER_ABOVE
 -- The header's stone fades out over its last 14 rows (source/seams.py), so the fill starts under them and the two
 -- grains blend rather than meet in a line (seen in game).
 local FILL_UNDER_HEADER = 14
 local FOOTER = 33
-local INNER_EDGE, OUTER_EDGE = 3, 3
+local INNER_EDGE, OUTER_EDGE = 6, 3
+local EDGE_TOP = 6
 -- The ring hangs 7 past the inner border (art x 67 against 74), the plate's 29 are the header's last.
 local RING_OUT, LEFT_CAP, RIGHT_CAP = 7, 47, 29
 local FOOTER_LEFT, FOOTER_RIGHT = 22, 51
 
 local ORNAMENTS = {
   -- The side borders, between the header and the money bar: 16 rows of the art repeating.
+  { Point = "TOPINNER", Texture = NEXT .. "edge_left_top.png", TexCoords = { 0, INNER_EDGE / 8, 0, EDGE_TOP / 8 },
+    Width = INNER_EDGE, Height = EDGE_TOP, Y = HEADER_BOTTOM, Color = "White" },
   { Point = "INNER", Texture = NEXT .. "edge_left.png", TexCoords = { 0, INNER_EDGE / 8, 0, 1 }, Tile = 16,
-    Width = INNER_EDGE, Start = HEADER_BOTTOM, End = FOOTER, Color = "White" },
+    Width = INNER_EDGE, Start = HEADER_BOTTOM + EDGE_TOP, End = FOOTER, Color = "White" },
   { Point = "OUTER", Texture = NEXT .. "edge_right.png", TexCoords = { 0, OUTER_EDGE / 8, 0, 1 }, Tile = 16,
     Width = OUTER_EDGE, Start = HEADER_BOTTOM, End = FOOTER, Color = "White" },
   -- The header: its middle (the title bar) repeating between its two ends.

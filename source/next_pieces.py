@@ -11,7 +11,9 @@ Every file is a power of two, the piece in its top left, the rest transparent; n
   footer_left    images/footer.png x 0-22,    y 0-33  (the money bar's gold cap)
   footer_middle  images/footer.png x 22-278,  y 0-33  (the money bar, 256 wide, repeats seamlessly)
   footer_right   images/footer.png x 278-329, y 0-33  (the cap and the shadow it darkens into)
-  edge_left      the art's left border,  x 74-77,  y 52-63, 16 rows (its rows repeat every 4)
+  edge_left      the art's left border,  x 74-80,  y 52-63, 16 rows (its rows repeat every 4), with its inner shadow
+                 (x 77-80) as the classic theme draws it: the ring's notch above sits over all 6 columns
+  edge_left_top  the same columns, y 46-52: where the border bends out of the ring's notch, under the header
   edge_right     the art's right border, x 248-251, y 52-63, the same (the header's and money bar's last 3 columns)
 
 The classic theme's right border is 7 wide, art x 244-251, a shadow then the border; Next's is the border alone. So
@@ -97,5 +99,6 @@ if __name__ == "__main__":
 
     # The borders: rows 52-63 of the art are the same every 4 rows, so 16 rows repeat without a seam.
     rows = list(range(52, 64)) + list(range(52, 56))
-    write('edge_left', 8, 16, [list(art[y][74:77]) for y in rows])
+    write('edge_left', 8, 16, [list(art[y][74:80]) for y in rows])
+    write('edge_left_top', 8, 8, [list(art[y][74:80]) for y in range(46, 52)])
     write('edge_right', 8, 16, [list(art[y][248:251]) for y in rows])
